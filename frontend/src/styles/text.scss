@@ -1,0 +1,33 @@
+@use "./dimensions.scss";
+
+/* Font family */
+$fontFamilyText: var(--fontFamilyText, "Atkinson Hyperlegible Next");
+$fontFamilyTime: var(--fontFamilyTime, "Atkinson Hyperlegible Mono");
+
+/* Font size ratios */
+$fontSizeSmallerRatio: 0.6;
+$fontSizeSmallRatio: 0.8;
+$fontSizeLargeRatio: 1.5;
+$fontSizeLargerRatio: 2;
+
+/* Font size */
+$fontSizeSmaller: calc(0.6rem * #{dimensions.$multiplier});
+$fontSizeSmall: calc(0.8rem * #{dimensions.$multiplier});
+$fontSize: calc(1rem * #{dimensions.$multiplier});
+$fontSizeLarge: calc(1.5rem * #{dimensions.$multiplier});
+$fontSizeLarger: calc(2rem * #{dimensions.$multiplier});
+
+$fontSizeTitle: $fontSizeLarger;
+$fontSizeSubtitle: $fontSizeLarge;
+
+/* Font weight */
+$fontWeightLight: calc(300 * #{dimensions.$multiplier});
+$fontWeight: calc(400 * #{dimensions.$multiplier});
+$fontWeightSemiBold: calc(500 * #{dimensions.$multiplier});
+$fontWeightBold: calc(700 * #{dimensions.$multiplier});
+$fontWeightEmphasis: calc(350 * #{dimensions.$multiplier});
+$fontWeightTitle: calc(600 * #{dimensions.$multiplier});
+
+/* Line height */
+$lineHeightParagraph: calc($fontSize * 1.4);
+

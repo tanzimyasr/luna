@@ -1,0 +1,279 @@
+package handlers
+
+import (
+	"fmt"
+	"luna-backend/api/internal/util"
+	"luna-backend/auth"
+	"luna-backend/errors"
+	"luna-backend/files"
+	"luna-backend/types"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+func GetUserData(c *gin.Context) {
+	u := util.GetUtil(c)
+
+	userId := util.GetUserId(c)
+	user, err := u.Tx.Queries().GetUserData(userId)
+	if err != nil {
+		u.Error(err)
+		return
+	}
+
+	u.Success(&gin.H{"user": user})
+}
+
+func PatchUserData(c *gin.Context) {
+	u := util.GetUtil(c)
+
+	userId := util.GetUserId(c)
+
+	// Parse data to change
+	newUsername := c.PostForm("username")
+	newEmail := c.PostForm("email")
+	newPassword := c.PostForm("new_password")
+	rawNewProfilePicture := c.PostForm("pfp_url")
+	pfpFileHeader, pfpFileErr := c.FormFile("pfp_file")
+	rawNewSearchable := c.PostForm("searchable")
+
+	switch pfpFileErr {
+	case nil:
+		break
+	case http.ErrMissingFile:
+		pfpFileHeader = nil
+	default:
+		u.Error(errors.New().Status(http.StatusBadRequest).
+			AddErr(errors.LvlDebug, pfpFileErr).
+			Append(errors.LvlPlain, "Invalid form data"))
+	}
+
+	if newUsername == "" && newEmail == "" && newPassword == "" && rawNewProfilePicture == "" && rawNewSearchable == "" && pfpFileHeader == nil {
+		u.Error(errors.New().Status(http.StatusBadRequest).
+			Append(errors.LvlPlain, "Nothing to change"))
+		return
+	}
+
+	if newUsername != "" && util.IsValidUsername(newUsername) != nil {
+		u.Error(errors.New().Status(http.StatusBadRequest).
+			Append(errors.LvlPlain, "Invalid username"))
+		return
+	}
+	if newEmail != "" && util.IsValidEmail(newEmail) != nil {
+		u.Error(errors.New().Status(http.StatusBadRequest).
+			Append(errors.LvlPlain, "Invalid email"))
+		return
+	}
+	if newPassword != "" && util.IsValidPassword(newPassword) != nil {
+		u.Error(errors.New().Status(http.StatusBadRequest).
+			Append(errors.LvlPlain, "Invalid password"))
+		return
+	}
+
+	newSearchable := false
+	if rawNewSearchable != "" {
+		if rawNewSearchable != "true" && rawNewSearchable != "false" {
+			u.Error(errors.New().Status(http.StatusBadRequest).
+				Append(errors.LvlPlain, "Invalid searchable value"))
+			return
+		}
+		newSearchable = rawNewSearchable == "true"
+	}
+
+	var newProfilePicture *types.Url
+	if rawNewProfilePicture != "" {
+		if util.IsValidUrl(rawNewProfilePicture) != nil {
+			u.Error(errors.New().Status(http.StatusBadRequest).
+				Append(errors.LvlPlain, "Invalid profile picture URL"))
+			return
+		}
+		var err error
+		newProfilePicture, err = types.NewUrl(rawNewProfilePicture)
+		if err != nil {
+			u.Error(errors.New().Status(http.StatusBadRequest).
+				Append(errors.LvlPlain, "Invalid profile picture url"))
+			return
+		}
+	} else if pfpFileHeader != nil {
+		pfpFile, err := pfpFileHeader.Open()
+		if err != nil {
+			u.Error(errors.New().Status(http.StatusBadRequest).
+				AddErr(errors.LvlDebug, err).
+				Append(errors.LvlPlain, "Could not open profile picture file"))
+			return
+		}
+
+		uploadedFile, tr := files.NewDatabaseFileFromContent(pfpFileHeader.Filename, pfpFile, userId, u.Tx.Queries())
+		if tr != nil {
+			u.Error(tr.
+				Append(errors.LvlDebug, "Could not create file from content").
+				Append(errors.LvlPlain, "Could not upload profile picture"))
+			return
+		}
+
+		fileId := uploadedFile.GetId()
+		fileUrl := fmt.Sprintf("/api/files/%s", fileId.String())
+		newProfilePicture, err = types.NewUrl(fileUrl)
+		if err != nil {
+			u.Error(errors.New().Status(http.StatusInternalServerError).
+				Append(errors.LvlDebug, "Could not create file url").
+				Append(errors.LvlPlain, "Could not upload profile picture"))
+			return
+		}
+	}
+
+	// Delete old profile picture if applicable
+	oldUserStruct, tr := u.Tx.Queries().GetUserData(userId)
+	if tr != nil {
+		u.Error(tr)
+		return
+	}
+
+	if newProfilePicture != nil {
+		// Check if the old profile picture is a database file
+		oldFileId, err := util.IsDatabaseFileUrl(oldUserStruct.ProfilePicture)
+		// Delete if it is
+		if err == nil {
+			oldFile := files.GetDatabaseFile(oldFileId)
+			tr := u.Tx.Queries().DeleteFilecache(oldFile, userId)
+			if tr != nil {
+				tr = tr.Append(errors.LvlWordy, "Could not delete old profile picture")
+				u.Warn(tr)
+			}
+		}
+	}
+
+	// Reauthenticate if needed
+	reauthenticationRequired := newUsername != "" || newEmail != "" || newPassword != ""
+
+	if reauthenticationRequired {
+		password := c.PostForm("password")
+		if password == "" {
+			u.Error(errors.New().Status(http.StatusBadRequest).
+				Append(errors.LvlPlain, "Missing password"))
+			return
+		}
+
+		// Get the user's password
+		savedPassword, err := u.Tx.Queries().GetPassword(userId)
+		if err != nil {
+			u.Error(err.Status(http.StatusUnauthorized).
+				Append(errors.LvlDebug, "Could not get password for user %v", userId.String()).
+				Append(errors.LvlPlain, "Invalid credentials"),
+			)
+			return
+		}
+
+		// Verify the password
+		if !auth.VerifyPassword(password, savedPassword) {
+			u.Error(errors.New().Status(http.StatusUnauthorized).
+				Append(errors.LvlDebug, "Wrong password").
+				Append(errors.LvlPlain, "Invalid credentials"),
+			)
+			return
+		}
+	}
+
+	// Update the user
+	if newUsername != "" || newEmail != "" || rawNewSearchable != "" || newProfilePicture != nil {
+		newUserStruct := &types.User{
+			Id:             userId,
+			Username:       newUsername,
+			Email:          newEmail,
+			Searchable:     newSearchable,
+			ProfilePicture: newProfilePicture,
+		}
+
+		newUserStruct.Admin = oldUserStruct.Admin
+
+		if newUsername == "" {
+			newUserStruct.Username = oldUserStruct.Username
+		}
+		if newEmail == "" {
+			newUserStruct.Email = oldUserStruct.Email
+		}
+		if rawNewSearchable == "" {
+			newUserStruct.Searchable = oldUserStruct.Searchable
+		}
+		if newProfilePicture == nil {
+			newUserStruct.ProfilePicture = oldUserStruct.ProfilePicture
+		}
+
+		tr = u.Tx.Queries().UpdateUserData(newUserStruct)
+		if tr != nil {
+			u.Error(tr)
+			return
+		}
+	}
+
+	// Update the password
+	if newPassword != "" {
+		securedPassword, err := auth.SecurePassword(newPassword)
+		if err != nil {
+			u.Error(err.
+				Append(errors.LvlDebug, "Could not hash new password"),
+			)
+			return
+		}
+		err = u.Tx.Queries().UpdatePassword(userId, securedPassword)
+		if err != nil {
+			u.Error(err.
+				Append(errors.LvlDebug, "Could not update password"),
+			)
+			return
+		}
+	}
+
+	response := &gin.H{
+		"status": "ok",
+	}
+
+	if newProfilePicture != nil {
+		(*response)["profile_picture"] = newProfilePicture.String()
+	}
+
+	u.Success(response)
+}
+
+func DeleteUser(c *gin.Context) {
+	u := util.GetUtil(c)
+
+	userId := util.GetUserId(c)
+
+	// Get the user's password
+	password := c.PostForm("password")
+	if password == "" {
+		u.Error(errors.New().Status(http.StatusBadRequest).
+			Append(errors.LvlPlain, "Missing password"),
+		)
+		return
+	}
+
+	// Get the user's password
+	savedPassword, err := u.Tx.Queries().GetPassword(userId)
+	if err != nil {
+		u.Error(err.Status(http.StatusUnauthorized).
+			Append(errors.LvlDebug, "Could not get password for user %v", userId.String()).
+			Append(errors.LvlPlain, "Invalid credentials"),
+		)
+		return
+	}
+
+	// Verify the password
+	if !auth.VerifyPassword(password, savedPassword) {
+		u.Error(errors.New().Status(http.StatusUnauthorized).
+			Append(errors.LvlDebug, "Wrong password").
+			Append(errors.LvlPlain, "Invalid credentials"),
+		)
+		return
+	}
+
+	err = u.Tx.Queries().DeleteUser(userId)
+	if err != nil {
+		u.Error(err)
+		return
+	}
+
+	u.Success(nil)
+}

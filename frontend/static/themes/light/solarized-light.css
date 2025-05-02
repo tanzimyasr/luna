@@ -1,0 +1,47 @@
+/* https://ethanschoonover.com/solarized/ */
+html[data-theme="light"] {
+  --solarizedBase03: #002b36;
+  --solarizedBase02: #073642;
+  --solarizedBase01: #586e75;
+  --solarizedBase00: #657b83;
+  --solarizedBase0: #839496;
+  --solarizedBase1: #93a1a1;
+  --solarizedBase2: #eee8d5;
+  --solarizedBase3: #fdf6e3;
+  --solarizedYellow: #b58900;
+  --solarizedOrange: #cb4b16;
+  --solarizedRed: #dc322f;
+  --solarizedMagenta: #d33682;
+  --solarizedViolet: #6c71c4;
+  --solarizedBlue: #268bd2;
+  --solarizedCyan: #2aa198;
+  --solarizedGreen: #859900;
+
+  --colorForegroundDark: var(--solarizedBase00);
+  --colorForegroundBright: var(--solarizedBase0);
+
+  --colorForegroundLink: var(--solarizedBlue);
+
+  --colorBackgroundPrimary: var(--solarizedBase3);
+  --colorForegroundPrimary: var(--colorForegroundDark);
+
+  --colorBackgroundSecondary: var(--solarizedBase2);
+  --colorForegroundSecondary: var(--colorForegroundDark);
+
+  --colorBackgroundTertiary: hsl(46, 42%, 75%);
+  --colorForegroundTertiary: var(--colorForegroundDark);
+
+  --colorBackgroundSuccess: var(--solarizedGreen);
+  --colorForegroundSuccess: var(--solarizedBase3);
+
+  --colorBackgroundWarning: var(--solarizedYellow);
+  --colorForegroundWarning: var(--solarizedBase3);
+
+  --colorBackgroundDanger: var(--solarizedRed);
+  --colorForegroundDanger: var(--solarizedBase3);
+
+  --colorBackgroundAccent: var(--solarizedCyan);
+  --colorForegroundAccent: var(--solarizedBase3);
+  
+  --colorForegroundSunday: var(--solarizedMagenta);
+}

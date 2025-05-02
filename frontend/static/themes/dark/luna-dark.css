@@ -1,0 +1,28 @@
+html[data-theme="dark"] {
+  --colorForegroundDark: #000000;
+  --colorForegroundBright: hsl(220, 10%, 80%);
+  --colorForegroundLink: hsl(213, 69%, 42%);
+
+  --colorBackgroundPrimary: hsl(220, 10%, 12%);
+  --colorForegroundPrimary: var(--colorForegroundBright);
+
+  --colorBackgroundSecondary: hsl(220, 10%, 22%);
+  --colorForegroundSecondary: var(--colorForegroundBright);
+
+  --colorBackgroundTertiary: hsl(220, 10%, 32%);
+  --colorForegroundTertiary: var(--colorForegroundBright);
+
+  --colorBackgroundSuccess: hsl(107, 53%, 37%);
+  --colorForegroundSuccess: var(--colorForegroundDark);
+
+  --colorBackgroundWarning: hsl(39, 100%, 40%);
+  --colorForegroundWarning: var(--colorForegroundDark);
+
+  --colorBackgroundDanger: hsl(0, 69%, 52%);
+  --colorForegroundDanger: var(--colorForegroundDark);
+
+  --colorBackgroundAccent: hsl(213, 69%, 52%);
+  --colorForegroundAccent: var(--colorForegroundDark);
+  
+  --colorForegroundSunday: hsl(0, 71%, 58%);
+}

@@ -1,0 +1,39 @@
+@use "sass:math";
+
+/* Multiplier */
+$multiplier: var(--uiScaling, 1);
+$test: 1;
+
+/* Gaps */
+$gapTiny: 0.2em;
+$gapSmaller: 0.25em;
+$gapSmall: 0.5em;
+$gapMiddle: 0.75em;
+$gapLarge: 1em;
+$gapLarger: 2em;
+
+/* Border Radius */
+$borderRadiusSmall: var(--borderRadiusSmall, .25em);
+$borderRadius: var(--borderRadius, .5em);
+$borderRadiusLarge: var(--borderRadiusLarge, 1em);
+
+/* Navbar */
+$navbarHeight: 3em;
+$navbarHeightSmall: 2em;
+
+/* Images */
+$imageHeightSmall: 3em;
+$imageHeight: 5em;
+
+/* Blur */
+$blur: 0.15em;
+$blurLarge: 0.5em;
+
+/* Lines */
+$borderWidth: .1em;
+$underlineWidth: .15em;
+$barFocusIndicatorWidth: .3em;
+
+/* Buttons */
+$buttonMinWidth: 5em;
+$buttonMinWidthCompact: 3em;

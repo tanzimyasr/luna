@@ -1,0 +1,29 @@
+/* https://draculatheme.com/ */
+html[data-theme="dark"] {
+  --colorForegroundDark: #282A36;
+  --colorForegroundBright: #F8F8F2;
+  --colorForegroundLink: #6272A4;
+
+  --colorBackgroundPrimary: #282A36;
+  --colorForegroundPrimary: var(--colorForegroundBright);
+
+  --colorBackgroundSecondary: #44475A;
+  --colorForegroundSecondary: var(--colorForegroundBright);
+
+  --colorBackgroundTertiary: hsl(232, 14%, 41%);
+  --colorForegroundTertiary: var(--colorForegroundBright);
+
+  --colorBackgroundSuccess: #50FA7B;
+  --colorForegroundSuccess: var(--colorForegroundDark);
+
+  --colorBackgroundWarning: #F1FA8C;
+  --colorForegroundWarning: var(--colorForegroundDark);
+
+  --colorBackgroundDanger: #FF5555;
+  --colorForegroundDanger: var(--colorForegroundDark);
+
+  --colorBackgroundAccent: #BD93F9;
+  --colorForegroundAccent: var(--colorForegroundDark);
+
+  --colorForegroundSunday: #BD93F9;
+}

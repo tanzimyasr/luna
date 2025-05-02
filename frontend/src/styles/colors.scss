@@ -1,0 +1,62 @@
+/* Main colors */
+$foregroundDark: var(--colorForegroundDark, #000000);
+$foregroundBright: var(--colorForegroundBright, #ffffff);
+$foregroundLink: var(--colorForegroundLink, hsl(213, 69%, 42%));
+
+$backgroundPrimary: var(--colorBackgroundPrimary, #ffffff);
+$foregroundPrimary: var(--colorForegroundPrimary, $foregroundDark);
+
+$backgroundSecondary: var(--colorBackgroundSecondary, #f0f0f0);
+$foregroundSecondary: var(--colorForegroundSecondary, $foregroundPrimary);
+
+$backgroundTertiary: var(--colorBackgroundTertiary, #e0e0e0);
+$foregroundTertiary: var(--colorForegroundTertiary, $foregroundSecondary);
+
+$backgroundSuccess: var(--colorBackgroundSuccess, hsl(107, 53%, 47%));
+$foregroundSuccess: var(--colorForegroundSuccess, $foregroundBright);
+
+$backgroundWarning: var(--colorBackgroundWarning, hsl(39, 100%, 50%));
+$foregroundWarning: $foregroundBright;
+
+$backgroundFailure: var(--colorBackgroundDanger, hsl(0, 69%, 62%));
+$foregroundFailure: var(--colorForegroundDanger, $foregroundBright);
+
+$backgroundAccent: var(--colorBackgroundAccent, hsl(213, 69%, 62%));
+$foregroundAccent: var(--colorForegroundAccent, $foregroundBright);
+
+/* Calendar colors */
+$foregroundSunday: var(--colorForegroundSunday, hsl(0, 71%, 58%));
+
+/* Notification and button colors */
+$specialColors: (
+  success: (
+    background: $backgroundSuccess,
+    foreground: $foregroundSuccess,
+  ),
+  warning: (
+    background: $backgroundWarning,
+    foreground: $foregroundWarning,
+  ),
+  danger: (
+    background: $backgroundFailure,
+    foreground: $foregroundFailure,
+  ),
+  accent: (
+    background: $backgroundAccent,
+    foreground: $foregroundAccent,
+  ),
+  neutral: (
+    background: $backgroundSecondary,
+    foreground: $foregroundSecondary,
+  ),
+  inherit: (
+    background: inherit,
+    foreground: inherit,
+  ),
+);
+
+/* Decoration */
+$barFocusIndicatorColor: $backgroundAccent;
+$barFocusIndicatorColorAlt: $backgroundSecondary;
+
+$underlineFocusIndicatorColor: currentColor;
